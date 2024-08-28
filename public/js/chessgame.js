@@ -1,5 +1,3 @@
-const { render } = require("ejs");
-
 const socket = io();
 const chess = new Chess();
 const boardElement = document.querySelector('.chessboard');
@@ -39,7 +37,7 @@ const renderBoard = () => {
           }
         });
 
-        pieceElement.addEventListener('dragend', (e) => {
+        pieceElement.addEventListener('dragend', () => {
           draggedPiece = null;
           sourceSquare = null;
         });
@@ -47,11 +45,11 @@ const renderBoard = () => {
         squareElement.appendChild(pieceElement);
       }
 
-      squareElement.addEventListener('dragover', function (e) {
+      squareElement.addEventListener('dragover', (e) => {
         e.preventDefault();
       });
 
-      squareElement.addEventListener('drop', function (e) {
+      squareElement.addEventListener('drop', (e) => {
         e.preventDefault();
         if (draggedPiece) {
           const targetSquare = {
@@ -62,27 +60,26 @@ const renderBoard = () => {
           handleMove(sourceSquare, targetSquare);
         }
       });
+
       boardElement.appendChild(squareElement);
     });
   });
 
-if(playerRole === "B"){
-    boardElement.classList.add("flipped");
-}
-else{
-    boardElement.classList.remove("flipped");
-}
-
+  if (playerRole === 'b') {
+    boardElement.classList.add('flipped');
+  } else {
+    boardElement.classList.remove('flipped');
+  }
 };
 
 const handleMove = (source, target) => {
   const move = {
-    from: `${string.fromCharCode(97+source.col)}${8-source.row}`,
-    to: `${string.fromCharCode(97+target.col)}${8-target.row}`,
-    promotion: "q",
+    from: ${String.fromCharCode(97 + source.col)}${8 - source.row},
+    to: ${String.fromCharCode(97 + target.col)}${8 - target.row},
+    promotion: 'q',
   };
 
-  socket.emit("move", move);
+  socket.emit('move', move);
 };
 
 const getPieceUnicode = (piece) => {
@@ -104,27 +101,24 @@ const getPieceUnicode = (piece) => {
   return unicodePieces[piece.type] || '';
 };
 
-
-socket.io("playerRole", function (role){
-    playerRole = role;
-    renderBoard();
+socket.on('playerRole', (role) => {
+  playerRole = role;
+  renderBoard();
 });
 
-socket.io("spectatorRole", function (){
-    playerRole = null;
-    renderBoard();
+socket.on('spectatorRole', () => {
+  playerRole = null;
+  renderBoard();
 });
 
-socket.io("boardState", function (fen){
-    chess.load(fen);
-    renderBoard();
+socket.on('boardState', (fen) => {
+  chess.load(fen);
+  renderBoard();
 });
 
-socket.io("move", function (move){
-    chess.move(move);
-    renderBoard();
+socket.on('move', (move) => {
+  chess.move(move);
+  renderBoard();
 });
-
-
 
 renderBoard();
